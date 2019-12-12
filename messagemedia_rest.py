@@ -15,14 +15,17 @@ class MessageMediaREST:
         self._api_host = api_host
 
 
-    def _auth_headers(self, method, request_path, content = None):
+    def _auth_headers(self, method, request_path, content = None, _override_date = None):
         headers = {}
         headers_sequence = []
         auth_data = []
 
         # Add Date header
-        now = datetime.utcnow()
-        headers["Date"] = datetime.strftime(now, "%a, %-d %b %Y %H:%M:%S GMT")
+        if _override_date is None:
+            now = datetime.utcnow()
+            headers["Date"] = datetime.strftime(now, "%a, %-d %b %Y %H:%M:%S GMT")
+        else:
+            headers["Date"] = _override_date
         headers_sequence.append("Date")
         auth_data.append(f"Date: {headers['Date']}")
 
