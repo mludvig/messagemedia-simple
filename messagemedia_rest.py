@@ -9,13 +9,25 @@ import hashlib
 import requests
 
 class MessageMediaREST:
-    def __init__(self, api_key, api_secret, api_host = "api.messagemedia.com"):
+    def __init__(self, api_key, api_secret, hmac_auth = True, api_host = "api.messagemedia.com"):
         self._api_key = api_key
         self._api_secret = api_secret
         self._api_host = api_host
-
+        self._hmac_auth = hmac_auth
 
     def _auth_headers(self, method, request_path, content = None, _override_date = None):
+        if self._hmac_auth:
+            return self._auth_headers_hmac(method, request_path, content, _override_date)
+        else:
+            return self._auth_headers_basic(method, request_path)
+
+    def _auth_headers_basic(self, method, request_path):
+        headers = {}
+        auth_str = base64.b64encode(f"{self._api_key}:{self._api_secret}".encode("ascii")).decode("ascii")
+        headers["Authorization"] = f"Basic {auth_str}"
+        return headers
+
+    def _auth_headers_hmac(self, method, request_path, content = None, _override_date = None):
         headers = {}
         headers_sequence = []
         auth_data = []
@@ -135,8 +147,3 @@ class MessageMediaREST:
         response = self._make_api_call("POST", api_path, payload)
 
         return response.json()
-
-
-if __name__ == "__main__":
-    mm = MessageMediaREST("API_KEY_12345678", "API_SECRET_12345678")
-    print(mm._build_auth("GET", "/v1/", "bc29bec61ba97d2092e9aebecf8ef744"))

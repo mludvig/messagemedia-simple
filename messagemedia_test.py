@@ -8,13 +8,19 @@ from messagemedia_rest import MessageMediaREST
 API_KEY="API_KEY_12345678"
 API_SECRET="API_SECRET_12345678"
 
-def test_auth_without_content():
+def test_basic_auth():
+    mm = MessageMediaREST(API_KEY, API_SECRET, hmac_auth = False)
+    response = mm._auth_headers("GET", "/v1")
+    expected_auth = 'Basic QVBJX0tFWV8xMjM0NTY3ODpBUElfU0VDUkVUXzEyMzQ1Njc4'
+    assert response['Authorization'] == expected_auth
+
+def test_hmac_auth_without_content():
     mm = MessageMediaREST(API_KEY, API_SECRET)
     response = mm._auth_headers("GET", "/v1")
     assert response['Date']
     assert response['Authorization']
 
-def test_auth_with_content():
+def test_hmac_auth_with_content():
     mm = MessageMediaREST(API_KEY, API_SECRET)
     content = '{ "something": "Test test test" }'
     response = mm._auth_headers("GET", "/v1", content.encode('ascii'))
@@ -26,14 +32,14 @@ def test_auth_with_content():
     max_delta = 2
     assert date.timestamp() > datetime.utcnow().timestamp() - max_delta
 
-def test_auth_without_content_set_date():
+def test_hmac_auth_without_content_set_date():
     mm = MessageMediaREST(API_KEY, API_SECRET)
     date = 'Thu, 12 Dec 2019 10:16:19 GMT'
     response = mm._auth_headers("GET", "/v1", _override_date=date)
     assert response['Date'] == date
     assert response['Authorization'] == 'hmac username="API_KEY_12345678", algorithm="hmac-sha1", headers="Date request-line", signature="GXoYmlLRdJSmIMbeM8YfL+ngCnY="'
 
-def test_auth_with_content_set_date():
+def test_hmac_auth_with_content_set_date():
     mm = MessageMediaREST(API_KEY, API_SECRET)
     content = '{ "something": "Test test test" }'
     date = 'Thu, 12 Dec 2019 10:16:19 GMT'
