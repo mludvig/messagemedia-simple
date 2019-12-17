@@ -8,14 +8,15 @@ import hmac
 import hashlib
 import requests
 
+
 class MessageMediaREST:
-    def __init__(self, api_key, api_secret, hmac_auth = True, api_host = "api.messagemedia.com"):
+    def __init__(self, api_key, api_secret, hmac_auth=True, api_host="api.messagemedia.com"):
         self._api_key = api_key
         self._api_secret = api_secret
         self._api_host = api_host
         self._hmac_auth = hmac_auth
 
-    def _auth_headers(self, method, request_path, content = None, _override_date = None):
+    def _auth_headers(self, method, request_path, content=None, _override_date=None):
         if self._hmac_auth:
             return self._auth_headers_hmac(method, request_path, content, _override_date)
         else:
@@ -27,7 +28,7 @@ class MessageMediaREST:
         headers["Authorization"] = f"Basic {auth_str}"
         return headers
 
-    def _auth_headers_hmac(self, method, request_path, content = None, _override_date = None):
+    def _auth_headers_hmac(self, method, request_path, content=None, _override_date=None):
         headers = {}
         headers_sequence = []
         auth_data = []
@@ -53,9 +54,9 @@ class MessageMediaREST:
         headers_sequence.append("request-line")
 
         # Calculate signature
-        auth_str = "\n".join(auth_data).encode('utf-8')
-        signature = hmac.HMAC(self._api_secret.encode('ascii'), auth_str, hashlib.sha1).digest()
-        signature_b64 = base64.b64encode(signature).decode('ascii')
+        auth_str = "\n".join(auth_data).encode("utf-8")
+        signature = hmac.HMAC(self._api_secret.encode("ascii"), auth_str, hashlib.sha1).digest()
+        signature_b64 = base64.b64encode(signature).decode("ascii")
 
         # Add Authorization header
         headers_str = " ".join(headers_sequence)
@@ -63,27 +64,20 @@ class MessageMediaREST:
 
         return headers
 
-
     def _make_api_call(self, method, api_path, payload=None):
         headers = self._auth_headers(method, api_path, payload)
-        headers['Accept'] = "application/json"
+        headers["Accept"] = "application/json"
         if payload is not None:
-            headers['Content-Type'] = "application/json"
+            headers["Content-Type"] = "application/json"
 
         if method == "GET":
-            response = requests.get(f"https://{self._api_host}{api_path}",
-                headers=headers,
-            )
+            response = requests.get(f"https://{self._api_host}{api_path}", headers=headers,)
         elif method == "POST":
-            response = requests.post(f"https://{self._api_host}{api_path}",
-                headers=headers,
-                data=payload,
-            )
+            response = requests.post(f"https://{self._api_host}{api_path}", headers=headers, data=payload,)
         else:
             raise NotImplementedError(f"HTTP method '{method}' is not implemented")
 
         return response
-
 
     def send_message(self, content, destination_number, delivery_report=True, message_format="SMS", message_expiry_timestamp=None, metadata=None):
         api_path = "/v1/messages"
@@ -97,11 +91,10 @@ class MessageMediaREST:
         if metadata is not None:
             message["metadata"] = metadata
 
-        payload = json.dumps({"messages":[message]}).encode('ascii')
+        payload = json.dumps({"messages": [message]}).encode("ascii")
         response = self._make_api_call("POST", api_path, payload)
 
         return response.json()
-
 
     def get_message_status(self, message_id):
         api_path = f"/v1/messages/{message_id}"
@@ -110,7 +103,6 @@ class MessageMediaREST:
 
         return response.json()
 
-
     def get_replies(self):
         api_path = f"/v1/replies"
 
@@ -118,17 +110,15 @@ class MessageMediaREST:
 
         return response.json()
 
-
     def confirm_replies(self, reply_ids):
         api_path = "/v1/replies/confirmed"
         if type(reply_ids) is not list:
-            reply_ids = [ reply_ids ]
+            reply_ids = [reply_ids]
 
-        payload = json.dumps({"reply_ids":[reply_ids]}).encode('ascii')
+        payload = json.dumps({"reply_ids": [reply_ids]}).encode("ascii")
         response = self._make_api_call("POST", api_path, payload)
 
         return response.json()
-
 
     def get_delivery_reports(self):
         api_path = f"/v1/delivery_reports"
@@ -137,13 +127,12 @@ class MessageMediaREST:
 
         return response.json()
 
-
     def confirm_delivery_reports(self, delivery_report_ids):
         api_path = "/v1/delivery_reports/confirmed"
         if type(delivery_report_ids) is not list:
-            delivery_report_ids = [ delivery_report_ids ]
+            delivery_report_ids = [delivery_report_ids]
 
-        payload = json.dumps({"delivery_report_ids":[delivery_report_ids]}).encode('ascii')
+        payload = json.dumps({"delivery_report_ids": [delivery_report_ids]}).encode("ascii")
         response = self._make_api_call("POST", api_path, payload)
 
         return response.json()
