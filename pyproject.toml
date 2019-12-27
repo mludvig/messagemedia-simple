@@ -12,7 +12,25 @@ keywords = [ 'messagemedia', 'sms' ]
 
 [tool.poetry.dependencies]
 python = "^3.6"
+#responses = "^0.10.9"  # Only needed for testing - see below in tox
 
 [tool.poetry.dev-dependencies]
 pytest = ""
 responses = ""
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+isolated_build = True
+envlist = py36,py37,py38
+
+[testenv]
+deps =
+  pytest
+  responses
+commands =
+  pytest -v
+
+[tox:.package]
+basepython = python3
+"""
