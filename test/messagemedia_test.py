@@ -3,7 +3,7 @@ from datetime import datetime
 import pytest
 import responses
 
-from messagemedia_rest import MessageMediaREST
+from messagemedia_simple import MessageMediaREST
 
 API_KEY = "API_KEY_12345678"
 API_SECRET = "API_SECRET_12345678"
