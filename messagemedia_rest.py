@@ -8,7 +8,6 @@ import hmac
 import hashlib
 import requests
 
-
 class MessageMediaREST:
     def __init__(self, api_key, api_secret, hmac_auth=True, api_host="api.messagemedia.com"):
         self._api_key = api_key
@@ -77,19 +76,20 @@ class MessageMediaREST:
         else:
             raise NotImplementedError(f"HTTP method '{method}' is not implemented")
 
+        # If request wasn't successful - raise Exception
+        # The exception will have e.response and e.request set
+        response.raise_for_status()
+
         return response
 
-    def send_message(self, content, destination_number, delivery_report=True, message_format="SMS", message_expiry_timestamp=None, metadata=None):
+    def send_message(self, content, destination_number, delivery_report=True, message_format="SMS", **kwargs):
         api_path = "/v1/messages"
         message = {}
         message["content"] = content
         message["destination_number"] = destination_number
         message["delivery_report"] = delivery_report
         message["format"] = message_format
-        if message_expiry_timestamp is not None:
-            message["message_expiry_timestamp"] = message_expiry_timestamp
-        if metadata is not None:
-            message["metadata"] = metadata
+        message.update(**kwargs)
 
         payload = json.dumps({"messages": [message]}).encode("ascii")
         response = self._make_api_call("POST", api_path, payload)
@@ -115,10 +115,10 @@ class MessageMediaREST:
         if type(reply_ids) is not list:
             reply_ids = [reply_ids]
 
-        payload = json.dumps({"reply_ids": [reply_ids]}).encode("ascii")
+        payload = json.dumps({"reply_ids": reply_ids}).encode("ascii")
         response = self._make_api_call("POST", api_path, payload)
 
-        return response.json()
+        return response.ok
 
     def get_delivery_reports(self):
         api_path = f"/v1/delivery_reports"
@@ -132,7 +132,7 @@ class MessageMediaREST:
         if type(delivery_report_ids) is not list:
             delivery_report_ids = [delivery_report_ids]
 
-        payload = json.dumps({"delivery_report_ids": [delivery_report_ids]}).encode("ascii")
+        payload = json.dumps({"delivery_report_ids": delivery_report_ids}).encode("ascii")
         response = self._make_api_call("POST", api_path, payload)
 
-        return response.json()
+        return response.ok
