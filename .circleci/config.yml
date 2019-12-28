@@ -51,14 +51,14 @@ jobs:
       - run:
           name: Verify git tag vs. package version
           command: |
+            set -x
             PACKAGE_VERSION=$(poetry version --no-ansi | cut -d\  -f2)
             test "v${PACKAGE_VERSION}" = "${CIRCLE_TAG}"
 
       - run:
           name: Configure PyPi
           command: |
-            poetry config repositories.test-pypi https://test.pypi.org/legacy/
-            poetry config pypi-token.test-pypi $PYPI_TOKEN_TEST
+            poetry config pypi-token.pypi $PYPI_TOKEN
 
       - run:
           name: Build dist archives
@@ -68,4 +68,4 @@ jobs:
       - run:
           name: Publish to PyPi
           command: |
-            poetry publish -r test-pypi
+            poetry publish
