@@ -112,7 +112,7 @@ class MessageMediaREST:
 
     def confirm_replies(self, reply_ids):
         api_path = "/v1/replies/confirmed"
-        if type(reply_ids) is not list:
+        if not isinstance(reply_ids, list):
             reply_ids = [reply_ids]
 
         payload = json.dumps({"reply_ids": reply_ids}).encode("ascii")
@@ -129,7 +129,7 @@ class MessageMediaREST:
 
     def confirm_delivery_reports(self, delivery_report_ids):
         api_path = "/v1/delivery_reports/confirmed"
-        if type(delivery_report_ids) is not list:
+        if not isinstance(delivery_report_ids, list):
             delivery_report_ids = [delivery_report_ids]
 
         payload = json.dumps({"delivery_report_ids": delivery_report_ids}).encode("ascii")

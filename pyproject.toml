@@ -26,9 +26,13 @@ envlist = py36,py37,py38
 
 [testenv]
 deps =
+  pylint
   pytest
   responses
 commands =
+  pylint --exit-zero messagemedia_simple
+  pylint --exit-zero --disable=protected-access test
+  pylint -E messagemedia_simple test
   pytest -v
 
 [tox:.package]
