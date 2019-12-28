@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 
+import pytest
 import responses
 
 from messagemedia_simple import MessageMediaREST
@@ -61,6 +62,12 @@ def test_hmac_auth_with_content_set_date():
     assert response["Date"] == KNOWN_DATE
     assert response["x-Content-MD5"] == KNOWN_CONTENT_MD5
     assert response["Authorization"] == KNOWN_AUTH_HMAC_WITH_CONTENT
+
+
+def test_make_api_call_invalid_method():
+    mm = MessageMediaREST(API_KEY, API_SECRET)
+    with pytest.raises(NotImplementedError):
+        response = mm._make_api_call("PUT", "/v1/messages")
 
 
 @responses.activate
@@ -163,4 +170,62 @@ def test_confirm_replies_multi():
 
     mm = MessageMediaREST(API_KEY, API_SECRET)
     response = mm.confirm_replies(["1234-1234-reply", "1234-5678-reply"])
+    assert response == True
+
+
+@responses.activate
+def test_get_delivery_reports():
+    path_url = "/v1/delivery_reports"
+
+    def request_callback(request):
+        assert request.method == "GET"
+        assert request.path_url == path_url
+        return (200, {}, json.dumps([{"message_id": "1234-1234", "reply_id": "1234-1234-reply"}]))
+
+    responses.add_callback(responses.GET, f"https://api.messagemedia.com{path_url}",
+                           callback=request_callback, content_type="application/json")
+
+    mm = MessageMediaREST(API_KEY, API_SECRET)
+    response = mm.get_delivery_reports()
+    # Check that we got the above "message_id"
+    assert response[0]["message_id"] == "1234-1234"
+    assert response[0]["reply_id"] == "1234-1234-reply"
+
+
+@responses.activate
+def test_confirm_delivery_reports_single():
+    path_url = "/v1/delivery_reports/confirmed"
+
+    def request_callback(request):
+        expected_payload = { "delivery_report_ids": [ "1234-1234-delivery" ] }
+        assert request.method == "POST"
+        assert request.path_url == path_url
+        payload = json.loads(request.body)
+        assert payload == expected_payload
+        return (200, {}, "")
+
+    responses.add_callback(responses.POST, f"https://api.messagemedia.com{path_url}",
+                           callback=request_callback, content_type="application/json")
+
+    mm = MessageMediaREST(API_KEY, API_SECRET)
+    response = mm.confirm_delivery_reports("1234-1234-delivery")
+    assert response == True
+
+
+@responses.activate
+def test_confirm_delivery_reports_multi():
+    path_url = "/v1/delivery_reports/confirmed"
+    def request_callback(request):
+        expected_payload = { "delivery_report_ids": [ "1234-1234-delivery", "1234-5678-delivery" ] }
+        assert request.method == responses.POST
+        assert request.path_url == path_url
+        payload = json.loads(request.body)
+        assert payload == expected_payload
+        return (200, {}, "")
+
+    responses.add_callback(responses.POST, f"https://api.messagemedia.com{path_url}",
+                           callback=request_callback, content_type="application/json")
+
+    mm = MessageMediaREST(API_KEY, API_SECRET)
+    response = mm.confirm_delivery_reports(["1234-1234-delivery", "1234-5678-delivery"])
     assert response == True
