@@ -67,7 +67,7 @@ def test_hmac_auth_with_content_set_date():
 def test_make_api_call_invalid_method():
     mm = MessageMediaREST(API_KEY, API_SECRET)
     with pytest.raises(NotImplementedError):
-        response = mm._make_api_call("PUT", "/v1/messages")
+        mm._make_api_call("PUT", "/v1/messages")
 
 
 @responses.activate
@@ -151,7 +151,7 @@ def test_confirm_replies_single():
 
     mm = MessageMediaREST(API_KEY, API_SECRET)
     response = mm.confirm_replies("1234-1234-reply")
-    assert response == True
+    assert response == True     # pylint: disable=singleton-comparison
 
 
 @responses.activate
@@ -170,7 +170,7 @@ def test_confirm_replies_multi():
 
     mm = MessageMediaREST(API_KEY, API_SECRET)
     response = mm.confirm_replies(["1234-1234-reply", "1234-5678-reply"])
-    assert response == True
+    assert response == True     # pylint: disable=singleton-comparison
 
 
 @responses.activate
@@ -209,7 +209,7 @@ def test_confirm_delivery_reports_single():
 
     mm = MessageMediaREST(API_KEY, API_SECRET)
     response = mm.confirm_delivery_reports("1234-1234-delivery")
-    assert response == True
+    assert response == True     # pylint: disable=singleton-comparison
 
 
 @responses.activate
@@ -228,4 +228,4 @@ def test_confirm_delivery_reports_multi():
 
     mm = MessageMediaREST(API_KEY, API_SECRET)
     response = mm.confirm_delivery_reports(["1234-1234-delivery", "1234-5678-delivery"])
-    assert response == True
+    assert response == True     # pylint: disable=singleton-comparison
