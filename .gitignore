@@ -1,4 +1,6 @@
-__pycache__
-.tox
-.pytest_cache
+__pycache__/
+.tox/
+.pytest_cache/
 poetry.lock
+dist/
+.coverage
