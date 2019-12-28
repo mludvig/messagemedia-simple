@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import os
 from datetime import datetime
 import base64
 import json
@@ -15,29 +14,30 @@ class MessageMediaREST:
         self._api_host = api_host
         self._hmac_auth = hmac_auth
 
-    def _auth_headers(self, method, request_path, content=None, _override_date=None):
-        if self._hmac_auth:
-            return self._auth_headers_hmac(method, request_path, content, _override_date)
-        else:
-            return self._auth_headers_basic(method, request_path)
+        self._override_date = None  # Used for unit testing
 
-    def _auth_headers_basic(self, method, request_path):
+    def _auth_headers(self, method, request_path, content=None):
+        if self._hmac_auth:
+            return self._auth_headers_hmac(method, request_path, content)
+        return self._auth_headers_basic(method, request_path)
+
+    def _auth_headers_basic(self, method, request_path):    # pylint: disable=unused-argument
         headers = {}
         auth_str = base64.b64encode(f"{self._api_key}:{self._api_secret}".encode("ascii")).decode("ascii")
         headers["Authorization"] = f"Basic {auth_str}"
         return headers
 
-    def _auth_headers_hmac(self, method, request_path, content=None, _override_date=None):
+    def _auth_headers_hmac(self, method, request_path, content=None):
         headers = {}
         headers_sequence = []
         auth_data = []
 
         # Add Date header
-        if _override_date is None:
+        if self._override_date is None:
             now = datetime.utcnow()
             headers["Date"] = datetime.strftime(now, "%a, %-d %b %Y %H:%M:%S GMT")
         else:
-            headers["Date"] = _override_date
+            headers["Date"] = self._override_date
         headers_sequence.append("Date")
         auth_data.append(f"Date: {headers['Date']}")
 
