@@ -33,7 +33,7 @@ jobs:
       - run:
           name: Run testsuite
           command: |
-            poetry run tox -e py36
+            poetry run tox --skip-missing-interpreters true
 
 
   publish:
@@ -58,7 +58,7 @@ jobs:
           name: Configure PyPi
           command: |
             poetry config repositories.test-pypi https://test.pypi.org/legacy/
-            poetry config http-basic.pypi $PYPI_USERNAME $PYPI_PASSWORD
+            poetry config pypi-token.test-pypi $PYPI_TOKEN_TEST
 
       - run:
           name: Build dist archives
