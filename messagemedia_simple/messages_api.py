@@ -7,7 +7,7 @@ import hmac
 import hashlib
 import requests
 
-class MessageMediaREST:
+class MessagesAPI:
     def __init__(self, api_key, api_secret, hmac_auth=True, api_host="api.messagemedia.com"):
         self._api_key = api_key
         self._api_secret = api_secret

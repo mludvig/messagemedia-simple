@@ -4,7 +4,7 @@ from datetime import datetime
 import pytest
 import responses
 
-from messagemedia_simple import MessageMediaREST
+from messagemedia_simple import MessagesAPI
 
 API_KEY = "API_KEY_12345678"
 API_SECRET = "API_SECRET_12345678"
@@ -16,21 +16,21 @@ KNOWN_CONTENT_MD5 = "5fe6c18746c7d300f04f08a1db90ced2"
 KNOWN_AUTH_HMAC_WITH_CONTENT = 'hmac username="API_KEY_12345678", algorithm="hmac-sha1", headers="Date x-Content-MD5 request-line", signature="sLAeOwXXix428meq3vhSmwdN2gg="'
 
 def test_basic_auth():
-    mm = MessageMediaREST(API_KEY, API_SECRET, hmac_auth=False)
+    mm = MessagesAPI(API_KEY, API_SECRET, hmac_auth=False)
     response = mm._auth_headers("GET", "/v1/messages")
     expected_auth = "Basic QVBJX0tFWV8xMjM0NTY3ODpBUElfU0VDUkVUXzEyMzQ1Njc4"
     assert response["Authorization"] == expected_auth
 
 
 def test_hmac_auth_without_content():
-    mm = MessageMediaREST(API_KEY, API_SECRET)
+    mm = MessagesAPI(API_KEY, API_SECRET)
     response = mm._auth_headers("GET", "/v1/messages")
     assert response["Date"]
     assert response["Authorization"]
 
 
 def test_hmac_auth_with_content():
-    mm = MessageMediaREST(API_KEY, API_SECRET)
+    mm = MessagesAPI(API_KEY, API_SECRET)
     content = KNOWN_CONTENT
     response = mm._auth_headers("POST", "/v1/messages", content.encode("ascii"))
     # Check that all required headers are set but don't check the values
@@ -44,7 +44,7 @@ def test_hmac_auth_with_content():
 
 
 def test_hmac_auth_without_content_set_date():
-    mm = MessageMediaREST(API_KEY, API_SECRET)
+    mm = MessagesAPI(API_KEY, API_SECRET)
     mm._override_date = KNOWN_DATE
     response = mm._auth_headers("GET", "/v1")
     assert response["Date"] == KNOWN_DATE
@@ -55,7 +55,7 @@ def test_hmac_auth_without_content_set_date():
 
 
 def test_hmac_auth_with_content_set_date():
-    mm = MessageMediaREST(API_KEY, API_SECRET)
+    mm = MessagesAPI(API_KEY, API_SECRET)
     mm._override_date = KNOWN_DATE
     content = KNOWN_CONTENT
     response = mm._auth_headers("POST", "/v1/messages", content.encode("ascii"))
@@ -65,7 +65,7 @@ def test_hmac_auth_with_content_set_date():
 
 
 def test_make_api_call_invalid_method():
-    mm = MessageMediaREST(API_KEY, API_SECRET)
+    mm = MessagesAPI(API_KEY, API_SECRET)
     with pytest.raises(NotImplementedError):
         mm._make_api_call("PUT", "/v1/messages")
 
@@ -89,7 +89,7 @@ def test_send_message():
     responses.add_callback(responses.POST, f"https://api.messagemedia.com{path_url}",
                            callback=request_callback, content_type="application/json")
 
-    mm = MessageMediaREST(API_KEY, API_SECRET)
+    mm = MessagesAPI(API_KEY, API_SECRET)
     mm._override_date = KNOWN_DATE
     response = mm.send_message("Content", "+1234567890")
 
@@ -108,7 +108,7 @@ def test_get_message_status():
     responses.add_callback(responses.GET, f"https://api.messagemedia.com{path_url}",
                            callback=request_callback, content_type="application/json")
 
-    mm = MessageMediaREST(API_KEY, API_SECRET)
+    mm = MessagesAPI(API_KEY, API_SECRET)
     response = mm.get_message_status("1234-1234")
 
     assert response["message_id"] == "1234-1234"
@@ -127,7 +127,7 @@ def test_get_replies():
     responses.add_callback(responses.GET, f"https://api.messagemedia.com{path_url}",
                            callback=request_callback, content_type="application/json")
 
-    mm = MessageMediaREST(API_KEY, API_SECRET)
+    mm = MessagesAPI(API_KEY, API_SECRET)
     response = mm.get_replies()
     # Check that we got the above "message_id"
     assert response[0]["message_id"] == "1234-1234"
@@ -149,7 +149,7 @@ def test_confirm_replies_single():
     responses.add_callback(responses.POST, f"https://api.messagemedia.com{path_url}",
                            callback=request_callback, content_type="application/json")
 
-    mm = MessageMediaREST(API_KEY, API_SECRET)
+    mm = MessagesAPI(API_KEY, API_SECRET)
     response = mm.confirm_replies("1234-1234-reply")
     assert response == True     # pylint: disable=singleton-comparison
 
@@ -168,7 +168,7 @@ def test_confirm_replies_multi():
     responses.add_callback(responses.POST, f"https://api.messagemedia.com{path_url}",
                            callback=request_callback, content_type="application/json")
 
-    mm = MessageMediaREST(API_KEY, API_SECRET)
+    mm = MessagesAPI(API_KEY, API_SECRET)
     response = mm.confirm_replies(["1234-1234-reply", "1234-5678-reply"])
     assert response == True     # pylint: disable=singleton-comparison
 
@@ -185,7 +185,7 @@ def test_get_delivery_reports():
     responses.add_callback(responses.GET, f"https://api.messagemedia.com{path_url}",
                            callback=request_callback, content_type="application/json")
 
-    mm = MessageMediaREST(API_KEY, API_SECRET)
+    mm = MessagesAPI(API_KEY, API_SECRET)
     response = mm.get_delivery_reports()
     # Check that we got the above "message_id"
     assert response[0]["message_id"] == "1234-1234"
@@ -207,7 +207,7 @@ def test_confirm_delivery_reports_single():
     responses.add_callback(responses.POST, f"https://api.messagemedia.com{path_url}",
                            callback=request_callback, content_type="application/json")
 
-    mm = MessageMediaREST(API_KEY, API_SECRET)
+    mm = MessagesAPI(API_KEY, API_SECRET)
     response = mm.confirm_delivery_reports("1234-1234-delivery")
     assert response == True     # pylint: disable=singleton-comparison
 
@@ -226,6 +226,6 @@ def test_confirm_delivery_reports_multi():
     responses.add_callback(responses.POST, f"https://api.messagemedia.com{path_url}",
                            callback=request_callback, content_type="application/json")
 
-    mm = MessageMediaREST(API_KEY, API_SECRET)
+    mm = MessagesAPI(API_KEY, API_SECRET)
     response = mm.confirm_delivery_reports(["1234-1234-delivery", "1234-5678-delivery"])
     assert response == True     # pylint: disable=singleton-comparison
