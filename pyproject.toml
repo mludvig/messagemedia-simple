@@ -15,11 +15,12 @@ repository = "https://github.com/mludvig/messagemedia-simple"
 [tool.poetry.dependencies]
 python = "^3.6"
 # responses = "^0.10.9"  # Only needed for testing - see below in tox
-tox = "^3.14"
+requests = "^2.22.0"
 
 [tool.poetry.dev-dependencies]
 pytest = ""
 responses = ""
+tox = "^3.14"
 
 [tool.tox]
 legacy_tox_ini = """
