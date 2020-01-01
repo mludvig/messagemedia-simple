@@ -4,7 +4,7 @@ build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "messagemedia-simple"
-version = "1.0.0"
+version = "1.0.1"
 license = "MIT"
 description = "Simple MessageMedia module for sending SMS messages."
 authors = ["Michael Ludvig <mludvig@logix.net.nz>"]
