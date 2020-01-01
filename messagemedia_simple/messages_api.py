@@ -35,7 +35,7 @@ class MessagesAPI:
         # Add Date header
         if self._override_date is None:
             now = datetime.utcnow()
-            headers["Date"] = datetime.strftime(now, "%a, %-d %b %Y %H:%M:%S GMT")
+            headers["Date"] = datetime.strftime(now, "%a, %d %b %Y %H:%M:%S GMT")
         else:
             headers["Date"] = self._override_date
         headers_sequence.append("Date")
